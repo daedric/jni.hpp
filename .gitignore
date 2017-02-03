@@ -2,3 +2,4 @@ tst*
 examples/*.class
 examples/*.log
 examples/*.jnilib
+build/
