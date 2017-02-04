@@ -21,6 +21,11 @@ add_executable (unit_tests_high
     "test/high_level.cpp"
 )
 
+# target-specific includes
+target_include_directories (unit_tests_low PRIVATE "test")
+target_include_directories (unit_tests_high PRIVATE "test")
+
+# common includes
 include_directories (
     PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include"
             "${JNI_INCLUDE_DIRS}"
