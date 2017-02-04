@@ -20,8 +20,9 @@ namespace jni
 
     template < class W >
     auto Unwrap(W&& w)
+        -> decltype(Wrapper<std::decay_t<W>>().Unwrap(std::declval<W>()))
        {
-        return Wrapper<typename std::decay<W>::type>().Unwrap(std::forward<W>(w));
+        return Wrapper<std::decay_t<W>>().Unwrap(std::forward<W>(w));
        }
 
     template < class T >
