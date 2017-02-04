@@ -27,15 +27,15 @@ int main()
    {
     /// TypeSignature
 
-    assert(jni::TypeSignature< jni::jboolean >()() == "Z");
-    assert(jni::TypeSignature< jni::jbyte    >()() == "B");
-    assert(jni::TypeSignature< jni::jchar    >()() == "C");
-    assert(jni::TypeSignature< jni::jshort   >()() == "S");
-    assert(jni::TypeSignature< jni::jint     >()() == "I");
-    assert(jni::TypeSignature< jni::jlong    >()() == "J");
-    assert(jni::TypeSignature< jni::jfloat   >()() == "F");
-    assert(jni::TypeSignature< jni::jdouble  >()() == "D");
-    assert(jni::TypeSignature< void          >()() == "V");
+    assert(jni::TypeSignature< jni::jboolean >()() == std::string("Z"));
+    assert(jni::TypeSignature< jni::jbyte    >()() == std::string("B"));
+    assert(jni::TypeSignature< jni::jchar    >()() == std::string("C"));
+    assert(jni::TypeSignature< jni::jshort   >()() == std::string("S"));
+    assert(jni::TypeSignature< jni::jint     >()() == std::string("I"));
+    assert(jni::TypeSignature< jni::jlong    >()() == std::string("J"));
+    assert(jni::TypeSignature< jni::jfloat   >()() == std::string("F"));
+    assert(jni::TypeSignature< jni::jdouble  >()() == std::string("D"));
+    assert(jni::TypeSignature< void          >()() == std::string("V"));
 
     assert(jni::TypeSignature< jni::Object<>  >()() == std::string("Ljava/lang/Object;"));
     assert(jni::TypeSignature< jni::String    >()() == std::string("Ljava/lang/String;"));
@@ -628,7 +628,7 @@ int main()
         assert(reinterpret_cast<jobject (*)(JNIEnv*, jobject, jobject)>(objectObject.fnPtr)(&env, nullptr, nullptr) == nullptr);
 
 
-        static const char* lastExceptionMessage = nullptr;
+        static std::string lastExceptionMessage;
         static Testable<jni::jclass> errorClassValue;
 
         env.functions->FindClass = [] (JNIEnv*, const char* name) -> jclass
@@ -640,22 +640,22 @@ int main()
         env.functions->ThrowNew = [] (JNIEnv*, ::jclass clazz, const char* message) -> jint
            {
             assert(clazz == Unwrap(errorClassValue.Ptr()));
-            lastExceptionMessage = message;
+            lastExceptionMessage.assign(message);
             return 0;
            };
 
         auto throwsException = jni::MakeNativeMethod("throwsException", [] (JNIEnv&, ObjectOrClass) { throw std::runtime_error("test"); });
-        lastExceptionMessage = nullptr;
+        lastExceptionMessage.clear();
         reinterpret_cast<void (*)(JNIEnv*, jobject)>(throwsException.fnPtr)(&env, nullptr);
         assert(lastExceptionMessage == std::string("test"));
 
         auto throwsUnknown = jni::MakeNativeMethod("throwsUnknown", [] (JNIEnv&, ObjectOrClass) { throw Test(); });
-        lastExceptionMessage = nullptr;
+        lastExceptionMessage.clear();
         reinterpret_cast<void (*)(JNIEnv*, jobject)>(throwsUnknown.fnPtr)(&env, nullptr);
         assert(lastExceptionMessage == std::string("unknown native exception"));
 
         auto javaException = jni::MakeNativeMethod("javaException", [] (JNIEnv&, ObjectOrClass) { jni::ThrowNew(env, jni::FindClass(env, "java/lang/Error"), "Java exception"); });
-        lastExceptionMessage = nullptr;
+        lastExceptionMessage.clear();
         reinterpret_cast<void (*)(JNIEnv*, jobject)>(javaException.fnPtr)(&env, nullptr);
         assert(lastExceptionMessage == std::string("Java exception"));
        };
