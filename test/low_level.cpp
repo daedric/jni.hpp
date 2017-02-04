@@ -186,8 +186,10 @@ static void TestMakeNativeMethod()
 //    jni::MakeNativeMethod("name", "sig", &Struct::StaticMethod );
 //    jni::MakeNativeMethod("name", "sig", Struct() );
 
+#if !defined(__GNUC__) // ...not a valid type for a template non-type parameter
     jni::MakeNativeMethod< decltype(Method),                Method                >("name", "sig");
     jni::MakeNativeMethod< decltype(StaticMethod),          StaticMethod          >("name", "sig");
+#endif
     jni::MakeNativeMethod< decltype(&Method),               &Method               >("name", "sig");
     jni::MakeNativeMethod< decltype(&StaticMethod),         &StaticMethod         >("name", "sig");
     jni::MakeNativeMethod< decltype(&Struct::Method),       &Struct::Method       >("name", "sig");

@@ -719,9 +719,10 @@ int main()
     std::vector<jboolean> vec = { jni::jni_true };
     assert(jni::Make<std::vector<jboolean>>(env, jni::Make<jni::Array<jni::jboolean>>(env, vec)) == vec);
 
-
+#if !defined(__GNUC__) // ...not a valid type for a template non-type parameter
     jni::MakeNativeMethod<decltype(Method), Method>("name");
     jni::MakeNativeMethod<decltype(StaticMethod), StaticMethod>("name");
+#endif
     jni::MakeNativeMethod<decltype(&Method), &Method>("name");
     jni::MakeNativeMethod<decltype(&StaticMethod), &StaticMethod>("name");
 
@@ -758,7 +759,11 @@ int main()
         METHOD("true", &Peer::True),
         METHOD("false", &Peer::False),
         METHOD("void", &Peer::Void),
+#if !defined(__GNUC__) // ...not a valid type for a template non-type parameter
         METHOD("static", Peer::Static),
+#else
+        METHOD("static", &Peer::Static),
+#endif
         METHOD("static", &Peer::Static),
         jni::MakeNativePeerMethod("static", [] (JNIEnv&, Peer&) {}));
 
