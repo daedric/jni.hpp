@@ -45,20 +45,19 @@ namespace jni
 
     namespace detail
        {
-        template < class Fn >
-        struct FnStore { static Fn* ptr; };
+        template < class M, class T = typename NativeMethodTraits<M>::Type >
+        struct FnStore { using Type = T; static T* ptr; };
 
-        template < class Fn >
-        Fn* FnStore<Fn>::ptr = nullptr;
+        template < class M, class T >
+        T* FnStore<M, T>::ptr = nullptr;
        }
 
     template < class M >
     auto MakeNativeMethod(const char* name, const char* sig, const M& m,
                           std::enable_if_t< std::is_class<M>::value >* = 0)
        {
-        using FunctionType = typename NativeMethodTraits<M>::Type;
         using ResultType = typename NativeMethodTraits<M>::ResultType;
-        using Function = detail::FnStore<FunctionType>;
+        using Function = detail::FnStore<M>;
 
         Function::ptr = m;
 
@@ -75,7 +74,7 @@ namespace jni
                }
            };
 
-        return JNINativeMethod< FunctionType > { name, sig, wrapper };
+        return JNINativeMethod< typename Function::Type > { name, sig, wrapper };
        }
 
 
