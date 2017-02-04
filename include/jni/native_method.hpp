@@ -43,20 +43,30 @@ namespace jni
 
     /// Low-level, lambda
 
+    namespace detail
+       {
+        template < class Fn >
+        struct FnStore { static Fn* ptr; };
+
+        template < class Fn >
+        Fn* FnStore<Fn>::ptr = nullptr;
+       }
+
     template < class M >
     auto MakeNativeMethod(const char* name, const char* sig, const M& m,
                           std::enable_if_t< std::is_class<M>::value >* = 0)
        {
         using FunctionType = typename NativeMethodTraits<M>::Type;
         using ResultType = typename NativeMethodTraits<M>::ResultType;
+        using Function = detail::FnStore<FunctionType>;
 
-        static FunctionType* method = m;
+        Function::ptr = m;
 
         auto wrapper = [] (JNIEnv* env, auto... args)
            {
             try
                {
-                return method(env, args...);
+                return Function::ptr(env, args...);
                }
             catch (...)
                {
