@@ -17,6 +17,14 @@ namespace jni
 
     using String = Object<StringTag>;
 
+#if defined(_MSC_VER)
+    // Workaround for bug in VS2015/2017. See:
+    // https://connect.microsoft.com/VisualStudio/Feedback/Details/1403302
+    using Ch16 = std::u16string::traits_type::int_type;
+#else
+    using Ch16 = std::u16string::traits_type::char_type;
+#endif
+
     inline std::u16string MakeAnything(ThingToMake<std::u16string>, JNIEnv& env, const String& string)
        {
         NullCheck(env, string.Get());
@@ -27,8 +35,9 @@ namespace jni
 
     inline std::string MakeAnything(ThingToMake<std::string>, JNIEnv& env, const String& string)
        {
-        return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>()
-            .to_bytes(Make<std::u16string>(env, string));
+        std::u16string u16str = Make<std::u16string>(env, string);
+        return std::wstring_convert<std::codecvt_utf8_utf16<Ch16>, Ch16>()
+            .to_bytes(reinterpret_cast<const Ch16*>(u16str.data()));
        }
 
     inline String MakeAnything(ThingToMake<String>, JNIEnv& env, const std::u16string& string)
@@ -38,7 +47,7 @@ namespace jni
 
     inline String MakeAnything(ThingToMake<String>, JNIEnv& env, const std::string& string)
        {
-        return Make<String>(env, std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>()
-            .from_bytes(string));
+        auto wstr = std::wstring_convert<std::codecvt_utf8_utf16<Ch16>, Ch16>().from_bytes(string);
+        return Make<String>(env, reinterpret_cast<const char16_t*>(wstr.data()));
        }
    }
