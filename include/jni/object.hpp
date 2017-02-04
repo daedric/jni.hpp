@@ -94,7 +94,7 @@ namespace jni
 
             template < class R, class... Args >
             auto Call(JNIEnv& env, const Method<TagType, R (Args...)>& method, const Args&... args) const
-               -> std::enable_if_t< !IsPrimitive<R>::value, R >
+               -> std::enable_if_t< !IsPrimitive<R>::value && !std::is_same<void, R>::value, R >
                {
                 return R(reinterpret_cast<UntaggedType<R>>(CallMethod<jobject*>(env, obj, method, Untag(args)...)));
                }
@@ -114,7 +114,7 @@ namespace jni
 
             template < class R, class... Args >
             auto CallNonvirtual(JNIEnv& env, const Class<TagType>& clazz, const Method<TagType, R (Args...)>& method, const Args&... args) const
-               -> std::enable_if_t< !IsPrimitive<R>::value, R >
+               -> std::enable_if_t< !IsPrimitive<R>::value && !std::is_same<void, R>::value, R >
                {
                 return R(reinterpret_cast<UntaggedType<R>>(CallNonvirtualMethod<jobject*>(env, obj, clazz, method, Untag(args)...)));
                }
