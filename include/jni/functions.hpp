@@ -581,26 +581,26 @@ namespace jni
 
 
     namespace detail
-    {
-        /* JavaVM::AttachCurrentThread(..) signature is
-           inconsistant across JDKs. */
+       {
+        // JavaVM::AttachCurrentThread(..) signature is
+        // inconsistant across JDKs.
         template <typename> struct AttachCurrentThreadMeta;
 
         template <> struct AttachCurrentThreadMeta<jint (JavaVM::*)(void **penv, void *args)>
-        { using env_type = void; };
+        { using EnvType = void; };
 
         template <> struct AttachCurrentThreadMeta<jint (JavaVM::*)(JNIEnv **penv, void *args)>
-        { using env_type = JNIEnv; };
-    }
+        { using EnvType = JNIEnv; };
+       }
 
     inline UniqueEnv AttachCurrentThread(JavaVM& vm)
        {
-        using env_type = typename
+        using EnvType = typename
             detail::AttachCurrentThreadMeta<
                 decltype(&JavaVM::AttachCurrentThread)
-            >::env_type;
+            >::EnvType;
 
-        env_type* result;
+        EnvType* result;
         CheckErrorCode(vm.AttachCurrentThread(&result, nullptr));
         return UniqueEnv(reinterpret_cast<JNIEnv*>(result), JNIEnvDeleter(vm));
        }
