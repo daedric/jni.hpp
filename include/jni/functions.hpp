@@ -141,18 +141,23 @@ namespace jni
     inline void DeleteGlobalRef(JNIEnv& env, UniqueGlobalRef<jobject>&& ref)
        {
         env.DeleteGlobalRef(Unwrap(ref.release()));
+        CheckJavaException(env);
        }
 
 
     template < class T >
-    T* NewLocalRef(JNIEnv& env, T* ref)
+    UniqueLocalRef<T> NewLocalRef(JNIEnv& env, T* t)
        {
-        return CheckJavaException(env, Wrap<T*>(env.NewLocalRef(Unwrap(ref))));
+        jobject* obj = Wrap<jobject*>(env.NewLocalRef(Unwrap(t)));
+        CheckJavaException(env);
+        if (t && !obj)
+            throw std::bad_alloc();
+        return UniqueLocalRef<T>(reinterpret_cast<T*>(obj), LocalRefDeleter(env));
        }
 
-    inline void DeleteLocalRef(JNIEnv& env, jobject* localRef)
+    inline void DeleteLocalRef(JNIEnv& env, UniqueLocalRef<jobject>&& ref)
        {
-        env.DeleteLocalRef(Unwrap(localRef));
+        env.DeleteLocalRef(Unwrap(ref.release()));
         CheckJavaException(env);
        }
 
@@ -162,18 +167,19 @@ namespace jni
        }
 
     template < class T >
-    UniqueWeakGlobalRef<T> NewWeakGlobalRef(JNIEnv& env, T& t)
+    UniqueWeakGlobalRef<T> NewWeakGlobalRef(JNIEnv& env, T* t)
        {
-        T* result = Wrap<T*>(env.NewWeakGlobalRef(Unwrap(t)));
+        jobject* obj = Wrap<jobject*>(env.NewWeakGlobalRef(Unwrap(t)));
         CheckJavaException(env);
-        if (!result)
+        if (t && !obj)
             throw std::bad_alloc();
-        return UniqueWeakGlobalRef<T>(result, WeakGlobalRefDeleter(env));
+        return UniqueWeakGlobalRef<T>(reinterpret_cast<T*>(obj), WeakGlobalRefDeleter(env));
        }
 
     inline void DeleteWeakGlobalRef(JNIEnv& env, UniqueWeakGlobalRef<jobject>&& ref)
        {
         env.DeleteWeakGlobalRef(Unwrap(ref.release()));
+        CheckJavaException(env);
        }
 
 
