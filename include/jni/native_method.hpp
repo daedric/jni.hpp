@@ -292,7 +292,7 @@ namespace jni
        {
         static Field<TagType, jni::jlong> field { env, clazz, fieldName };
 
-#if defined(_MSC_VER) && _MSC_VER <= 1900 // VS 2015
+#if defined(_MSC_VER) && _MSC_VER <= 1900 && !defined(__c2__) // VS2015
         RegisterNatives(env, clazz, methods.operator()<Peer>(field)...);
 #else
         RegisterNatives(env, clazz, methods.template operator()<Peer>(field)...);
@@ -346,7 +346,7 @@ namespace jni
         using InitializerMethodType = typename NativeMethodTraits<Initializer>::Type;
         NativePeerHelper<Peer, TagType, InitializerMethodType> helper;
 
-#if defined(_MSC_VER) && _MSC_VER <= 1900 // VS 2015
+#if defined(_MSC_VER) && _MSC_VER <= 1900 && !defined(__c2__) // VS2015
         RegisterNatives(env, clazz,
             helper.MakeInitializer(field, initializeMethodName, initialize),
             helper.MakeFinalizer(field, finalizeMethodName),

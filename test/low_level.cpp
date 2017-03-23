@@ -196,7 +196,7 @@ static void TestMakeNativeMethod()
     jni::MakeNativeMethod< decltype(&Struct::StaticMethod), &Struct::StaticMethod >("name", "sig");
     jni::MakeNativeMethod("name", "sig", [] (jni::JNIEnv*, jni::jobject*) {});
     jni::MakeNativeMethod("name", "sig", [] (jni::JNIEnv*, jni::jclass*) {});
-#if !defined(_MSC_VER)
+#if !defined(_MSC_VER) || defined(__c2__)
     jni::MakeNativeMethod("name", "sig", [] (jni::JNIEnv*, jni::jobject*) mutable {});
     jni::MakeNativeMethod("name", "sig", [] (jni::JNIEnv*, jni::jclass*) mutable {});
 #endif
